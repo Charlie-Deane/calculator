@@ -13,6 +13,9 @@ const digit_9 = document.getElementById("digit_9");
 //append screen variables to array
 const screenArray = [digit_0, digit_1, digit_2, digit_3, digit_4, digit_5, digit_6, digit_7, digit_8, digit_9]
 
+//define initArray
+const initArray = [];
+
 //define active array for gathering input
 let activeArray = [];
 
@@ -21,6 +24,9 @@ let previousArray = [];
 
 //define operand
 let operand = ' ';
+
+//set iterant for new expression or continuing (iterating) expression
+let iterant = false;
 
 //gather numpad buttons
 const numpad_0 = document.getElementById("numpad_0");
@@ -40,7 +46,7 @@ const operand_subtract = document.getElementById("operand_subtract");
 const operand_add = document.getElementById("operand_add");
 const operand_divide = document.getElementById("operand_divide");
 const operand_multiply = document.getElementById("operand_multiply");
-const operand_equals = document.getElementById("operand_equals");
+
 
 //gather super buttons
 const super_equals = document.getElementById("super_equals");
@@ -80,7 +86,6 @@ function arrayToNumber(arr)
 
     if(isNegative == true)
     {
-        console.log("isNegative");
         return (Number(str) * -1);
     }
     else
@@ -159,22 +164,20 @@ function operate(a, operand, b)
                 return ['I','D','1','0','T','E','r','r','o','r']
             }
             c = a / b;
-            console.log(c);
             break;
         case '*':
             c = a * b;
             break;
     }
     c = truncuateAndRound(c);
-    console.log(c);
     return numberToArray(c);
 }
 
 //writes array to calculator screen
 function writeArray(arr)
 {
-    //remove zeroes from the beginning
-    for(let i = 0; i < arr.length - 1 && arr[i] == 0 && arr[i+1] != '.'; i++)
+    //remove zeroes from the beginning of potential array
+    for(let i = 0; i < arr.length && arr[i] == 0 && arr[i+1] != '.'; i++)
     {
         arr[i] = ' ';
     }
@@ -182,6 +185,19 @@ function writeArray(arr)
     {
         screenArray[i].textContent = arr[i];
     }
+}
+function returnInitArray()
+{
+    digit_0.textContent = ' ';
+    digit_1.textContent = ' ';
+    digit_2.textContent = ' ';
+    digit_3.textContent = ' ';
+    digit_4.textContent = ' ';
+    digit_5.textContent = ' ';
+    digit_6.textContent = ' ';
+    digit_7.textContent = ' ';
+    digit_8.textContent = ' ';
+    digit_9.textContent = ' ';
 }
 
 //writes a specified value to specified index of screen
@@ -196,16 +212,29 @@ function numpadType(char)
 
 function assignOperand(char)
 {
-    previousArray = activeArray;
+    if(iterant == false)
+    {
+        previousArray = activeArray;
+    }
     activeArray = [];
+    returnInitArray();
     operand = char;
-    writeArray(activeArray);
 }
 
 function evaluateOperation()
 {
     previousArray = operate(previousArray, operand, activeArray);
+    activeArray = [];
     writeArray(previousArray);
+    iterant = true;
+}
+
+function clear()
+{
+    previousArray = [];
+    activeArray = [];
+    returnInitArray();
+    iterant = false;
 }
 
 //add click event listeners to numpad
@@ -244,3 +273,23 @@ numpad_decimal.addEventListener('click', () => {
 });
 
 //add click event listeners to operands
+operand_add.addEventListener('click', () => {
+    assignOperand('+');
+  });
+operand_divide.addEventListener('click', () => {
+    assignOperand('/');
+  });
+operand_multiply.addEventListener('click', () => {
+    assignOperand('*');
+  });
+operand_subtract.addEventListener('click', () => {
+    assignOperand('-');
+  });
+
+// add click event listeners to supers
+super_equals.addEventListener('click', () => {
+    evaluateOperation();
+  });
+super_clear.addEventListener('click', () => {
+    clear();
+  });
