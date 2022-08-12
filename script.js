@@ -1,13 +1,92 @@
+//gather screen variables
+const digit_0 = document.getElementById("digit_0");
+const digit_1 = document.getElementById("digit_1");
+const digit_2 = document.getElementById("digit_2");
+const digit_3 = document.getElementById("digit_3");
+const digit_4 = document.getElementById("digit_4");
+const digit_5 = document.getElementById("digit_5");
+const digit_6 = document.getElementById("digit_6");
+const digit_7 = document.getElementById("digit_7");
+const digit_8 = document.getElementById("digit_8");
+const digit_9 = document.getElementById("digit_9");
+
+//append screen variables to array
+const screenArray = [digit_0, digit_1, digit_2, digit_3, digit_4, digit_5, digit_6, digit_7, digit_8, digit_9]
+
+//define active array for gathering input
+let activeArray = [];
+
+//define previous array
+let previousArray = [];
+
+//define operand
+let operand = ' ';
+
+//gather numpad buttons
+const numpad_0 = document.getElementById("numpad_0");
+const numpad_1 = document.getElementById("numpad_1");
+const numpad_2 = document.getElementById("numpad_2");
+const numpad_3 = document.getElementById("numpad_3");
+const numpad_4 = document.getElementById("numpad_4");
+const numpad_5 = document.getElementById("numpad_5");
+const numpad_6 = document.getElementById("numpad_6");
+const numpad_7 = document.getElementById("numpad_7");
+const numpad_8 = document.getElementById("numpad_8");
+const numpad_9 = document.getElementById("numpad_9");
+const numpad_decimal = document.getElementById("numpad_decimal");
+
+//gather operand buttons
+const operand_subtract = document.getElementById("operand_subtract");
+const operand_add = document.getElementById("operand_add");
+const operand_divide = document.getElementById("operand_divide");
+const operand_multiply = document.getElementById("operand_multiply");
+const operand_equals = document.getElementById("operand_equals");
+
+//gather super buttons
+const super_equals = document.getElementById("super_equals");
+const super_clear = document.getElementById("super_clear");
+const super_backspace = document.getElementById("super_backspace"); 
 
 //converts an array to a numerical value
 function arrayToNumber(arr)
 {
+    let isNegative;
+    //handle negative numbers
+    if (arr.includes('-',0))
+    {
+        isNegative = true;
+        const negativeIndex = arr.indexOf('-');
+        if (negativeIndex > -1) 
+        {
+            arr.splice(negativeIndex, 1); // 2nd parameter means remove one item only
+        }
+    }
+    else
+    {
+        isNegative = false;
+    }
+
+    //initialize str var
     let str = '0';
+
+    //create a string with values from array
     for(let i = 0; i < arr.length; i++)
     {
-        str += arr[i];
+        if(arr[i] != ' ') //checks for formatting spaces from writeArray()
+        {
+            str += arr[i];
+        }
     }
-    return Number(str);
+
+    if(isNegative == true)
+    {
+        console.log("isNegative");
+        return (Number(str) * -1);
+    }
+    else
+    {
+        return Number(str);
+    }
 }
 
 //converts a numerical value to an array of characters
@@ -29,14 +108,37 @@ function numberToArray(num)
     return arr;
 }
 
-//operates with array a, string operand, and array b
+//format number output to fit on the screen
+function truncuateAndRound(num)
+{
+    //truncuate the number and take absolute value
+    let truncuated = Math.abs(Math.trunc(num)); 
+
+    //find how many digits to the left side of the decimal (including decimal)
+    if(truncuated < 1 && truncuated > -1) //avoid taking log(0)
+    {
+        digits = 2;
+    }
+    else
+    {
+        digits = Math.trunc(Math.log(truncuated)) + 2; 
+    }
+
+    //add a digit for the negative sign if number is less than 0
+    if (num < 0)
+    {
+        digits += 1; 
+    }
+
+    return Number(num.toFixed(10-digits));
+}
+
+//operates with array a, string operand, and array b >> returns an array
 function operate(a, operand, b)
 {
     //cast variable types
     a = arrayToNumber(a);
-    console.log(a);
     b = arrayToNumber(b);
-    console.log(b);
 
     //create resultant pointer
     let c;
@@ -54,62 +156,91 @@ function operate(a, operand, b)
             //check for divide by 0 error
             if(b == 0) 
             {
-                return ['e','r','r','o','r','E','r','r','o','r']
+                return ['I','D','1','0','T','E','r','r','o','r']
             }
             c = a / b;
+            console.log(c);
             break;
         case '*':
             c = a * b;
             break;
     }
+    c = truncuateAndRound(c);
+    console.log(c);
     return numberToArray(c);
 }
 
-//gather screen variables
-const digit_0 = document.getElementById("digit_0");
-const digit_1 = document.getElementById("digit_1");
-const digit_2 = document.getElementById("digit_2");
-const digit_3 = document.getElementById("digit_3");
-const digit_4 = document.getElementById("digit_4");
-const digit_5 = document.getElementById("digit_5");
-const digit_6 = document.getElementById("digit_6");
-const digit_7 = document.getElementById("digit_7");
-const digit_8 = document.getElementById("digit_8");
-const digit_9 = document.getElementById("digit_9");
+//writes array to calculator screen
+function writeArray(arr)
+{
+    //remove zeroes from the beginning
+    for(let i = 0; i < arr.length - 1 && arr[i] == 0 && arr[i+1] != '.'; i++)
+    {
+        arr[i] = ' ';
+    }
+    for(let i = 0; i < arr.length; i++)
+    {
+        screenArray[i].textContent = arr[i];
+    }
+}
 
-//gather numpad variables
-const numpad_0 = document.getElementById("numpad_0");
-const numpad_1 = document.getElementById("numpad_1");
-const numpad_2 = document.getElementById("numpad_2");
-const numpad_3 = document.getElementById("numpad_3");
-const numpad_4 = document.getElementById("numpad_4");
-const numpad_5 = document.getElementById("numpad_5");
-const numpad_6 = document.getElementById("numpad_6");
-const numpad_7 = document.getElementById("numpad_7");
-const numpad_8 = document.getElementById("numpad_8");
-const numpad_9 = document.getElementById("numpad_9");
-const numpad_decimal = document.getElementById("numpad_decimal");
+//writes a specified value to specified index of screen
+function numpadType(char)
+{
+    if (activeArray.length < 10) //do not allow overflow
+    {
+        activeArray += char;
+        writeArray(activeArray);
+    }
+}
 
-//gather operand variables
-const super_equals = document.getElementById("super_equals");
-const super_clear = document.getElementById("super_clear");
-const super_backspace = document.getElementById("super_backspace"); 
+function assignOperand(char)
+{
+    previousArray = activeArray;
+    activeArray = [];
+    operand = char;
+    writeArray(activeArray);
+}
 
-let a = 24;
-let aArr = numberToArray(a);
-a = arrayToNumber(aArr);
-console.log(aArr)
+function evaluateOperation()
+{
+    previousArray = operate(previousArray, operand, activeArray);
+    writeArray(previousArray);
+}
 
-let b = 22;
-let bArr = numberToArray(b);
-b = arrayToNumber(bArr);
-console.log(bArr);
+//add click event listeners to numpad
+numpad_0.addEventListener('click', () => {
+    numpadType('0');
+  });
+numpad_1.addEventListener('click', () => {
+  numpadType('1');
+});
+numpad_2.addEventListener('click', () => {
+  numpadType('2');
+});
+numpad_3.addEventListener('click', () => {
+  numpadType('3');
+});
+numpad_4.addEventListener('click', () => {
+  numpadType('4');
+});
+numpad_5.addEventListener('click', () => {
+  numpadType('5');
+});
+numpad_6.addEventListener('click', () => {
+  numpadType('6');
+});
+numpad_7.addEventListener('click', () => {
+  numpadType('7');
+});
+numpad_8.addEventListener('click', () => {
+  numpadType('8');
+});
+numpad_9.addEventListener('click', () => {
+    numpadType('9');
+  });
+numpad_decimal.addEventListener('click', () => {
+  numpadType('.');
+});
 
-let c = '-';
-console.log(c);
-
-console.log(operate(aArr,c,bArr));
-
-//note to self: you still need to fix division!
-//note to self: you need to fix negative numbers on subtraction!
-
+//add click event listeners to operands
