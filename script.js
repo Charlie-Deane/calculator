@@ -25,6 +25,9 @@ let previousArray = [];
 //define operand
 let operand = ' ';
 
+//checks to see if operand has already been given in the expression -- if it has then operands will evaluate the function
+let operandCheckSum = 0;
+
 //set iterant for new expression or continuing (iterating) expression
 let iterant = false;
 
@@ -100,7 +103,7 @@ function numberToArray(num)
     let arr = ['0','0','0','0','0','0','0','0','0','0'];
     if(num > 9999999999)
     {
-        return arr;
+        return ['O','V','E','R','F','L','0','0','0','W'];
     }
 
     let numString = num.toString();
@@ -212,13 +215,21 @@ function numpadType(char)
 
 function assignOperand(char)
 {
-    if(iterant == false)
+    if(operandCheckSum == 0) 
     {
-        previousArray = activeArray;
+        if(iterant == false)
+        {
+            previousArray = activeArray;
+        }
+        activeArray = [];
+        returnInitArray();
+        operand = char;
+        operandCheckSum = 1;
     }
-    activeArray = [];
-    returnInitArray();
-    operand = char;
+    else
+    {
+        evaluateOperation();
+    }
 }
 
 function evaluateOperation()
@@ -227,6 +238,7 @@ function evaluateOperation()
     activeArray = [];
     writeArray(previousArray);
     iterant = true;
+    operandCheckSum = 0;
 }
 
 function clear()
@@ -235,6 +247,16 @@ function clear()
     activeArray = [];
     returnInitArray();
     iterant = false;
+}
+
+function backspace()
+{
+    if(activeArray.length > 0)
+    {
+        activeArray = activeArray.slice(1);
+        returnInitArray();
+        writeArray(activeArray);
+    }
 }
 
 //add click event listeners to numpad
@@ -292,4 +314,7 @@ super_equals.addEventListener('click', () => {
   });
 super_clear.addEventListener('click', () => {
     clear();
+  });
+super_backspace.addEventListener('click', () => {
+    backspace();
   });
